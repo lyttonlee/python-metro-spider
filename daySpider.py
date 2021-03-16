@@ -16,7 +16,7 @@ cur = db.cursor()
 option = webdriver.ChromeOptions()
 option.add_argument('headless')
 driver = webdriver.Chrome(options=option)
-driver.set_window_size(1200, 800)
+# driver.set_window_size(1200, 800)
 
 citys = [
   {
@@ -280,7 +280,8 @@ def job():
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(job, 'interval', minutes=10)
+# scheduler.add_job(job, 'interval', minutes=10)
+scheduler.add_job(job, 'interval', hours=6)
 scheduler.start()
 
 while True:
