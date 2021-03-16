@@ -4,70 +4,51 @@ from bs4 import BeautifulSoup
 import time
 import os
 import pymysql
+# from apscheduler.schedulers.blocking import BlockingScheduler
+from apscheduler.schedulers.background import BackgroundScheduler
 
 db = pymysql.connect(host='39.108.210.247', user='root', passwd='lzr5680545', db='metro', port=3306)
 
 cur = db.cursor()
 
-driver = webdriver.Chrome()
+
+# 不打开浏览器窗口运行
+option = webdriver.ChromeOptions()
+option.add_argument('headless')
+driver = webdriver.Chrome(options=option)
 driver.set_window_size(1200, 800)
-
-def login():
-  # do login weibo
-  driver.get('https://weibo.com/')
-  time.sleep(10)
-  driver.find_element_by_xpath('//*[@id="pl_login_form"]/div/div[1]/div/a[2]').click()
-  # scan qrcode to login in 30 s
-  time.sleep(20)
-  pass
-
-login()
 
 citys = [
   {
     'name': '西安',
-    'url': 'https://weibo.com/xianditie?is_all=1&'
+    'url': 'https://weibo.com/xianditie'
   },
   {
     'name': '重庆',
-    'url': 'https://weibo.com/u/2152519810?is_all=1&'
+    'url': 'https://weibo.com/u/2152519810'
   },
   {
     'name': '成都',
-    'url': 'https://weibo.com/cdmetroyy?is_all=1&'
+    'url': 'https://weibo.com/cdmetroyy'
   },
   {
     'name': '武汉',
-    'url': 'https://weibo.com/u/3186945861?is_all=1&'
+    'url': 'https://weibo.com/u/3186945861'
   },
   {
     'name': '南京',
-    'url': 'https://weibo.com/u/2638276292?is_all=1&s'
+    'url': 'https://weibo.com/u/2638276292'
   },
   # {
   #   'name': '深圳',
-  #   'url': 'https://weibo.com/szmcservice?is_all=1&'
+  #   'url': 'https://weibo.com/szmcservice'
   # }
 ]
-
-years = ['2021']
-# mouths = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
-mouths = ['01', '02', '03']
 
 def scrollBottom():
   jsscript = 'window.scrollTo(0, document.body.clientHeight)'
   driver.execute_script(jsscript)
   time.sleep(6)
-
-def getPageSize():
-  try:
-    totalEl = driver.find_element_by_css_selector('.W_pages > .list > .S_txt1')
-    print(totalEl.get_attribute('action-data').split('&')[1])
-    return int(totalEl.get_attribute('action-data').split('&')[1].split('=')[1])
-  except Exception as e:
-    print('no such el reason only 1 page')
-    return 1
-  
 
 def getTime(node, curYear, name):
   # year = time.localtime().tm_year
@@ -271,46 +252,36 @@ def getData(name, curYear):
     pass
 
 
-def mainSpide(city, curYear, curMouth, curPage):
-  url = city['url'] + 'stat_date=' + curYear + curMouth + '&page=' + curPage + '#feedtop'
-  driver.get(url)
-  time.sleep(3)
-  # scroll to bottom
-  scrollTime = 4
-  while scrollTime > 0:
-    scrollBottom()
-    scrollTime -= 1
-    pass
-  getData(city['name'], curYear)
-  nextPage = int(curPage) + 1
-  time.sleep(5)
-  return nextPage
-
-# loop to spider data
-for city in citys:
-  for curYear in years:
-    for curMouth in mouths:
-      temPage = 1
-      initPage = '1'
-      url = city['url'] + 'stat_date=' + curYear + curMouth + '&page=' + initPage + '#feedtop'
-      driver.get(url)
-      time.sleep(3)
-      # scroll to bottom
-      scrollTime = 4
-      while scrollTime > 0:
-        scrollBottom()
-        scrollTime -= 1
-        pass
-      pageCount = getPageSize()
-      # get page size
-      getData(city['name'], curYear)
-      temPage += 1
-      time.sleep(5)
-      while temPage <= pageCount:
-        temPage = mainSpide(city, curYear, curMouth, str(temPage))
-        pass
+def spide():
+  # loop to spider data
+  for city in citys:
+    url = city['url']
+    driver.get(url)
+    time.sleep(3)
+    # scroll to bottom
+    scrollTime = 4
+    while scrollTime > 0:
+      scrollBottom()
+      scrollTime -= 1
       pass
+    curYear = time.strftime('%Y', time.localtime())
+    getData(city['name'], curYear)
+    # temPage += 1
+    # time.sleep(5)
+    # while temPage <= pageCount:
+    #   temPage = mainSpide(city, curYear, curMouth, str(temPage))
+    #   pass
     pass
-  
 
 
+def job():
+  spide()
+  # print('do job')
+
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(job, 'interval', minutes=10)
+scheduler.start()
+
+while True:
+  pass
