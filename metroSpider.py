@@ -24,35 +24,35 @@ def login():
 login()
 
 citys = [
-  {
-    'name': '西安',
-    'url': 'https://weibo.com/xianditie?is_all=1&'
-  },
+  # {
+  #   'name': '西安',
+  #   'url': 'https://weibo.com/xianditie?is_all=1&'
+  # },
   {
     'name': '重庆',
     'url': 'https://weibo.com/u/2152519810?is_all=1&'
   },
-  {
-    'name': '成都',
-    'url': 'https://weibo.com/cdmetroyy?is_all=1&'
-  },
+  # {
+  #   'name': '成都',
+  #   'url': 'https://weibo.com/cdmetroyy?is_all=1&'
+  # },
   {
     'name': '武汉',
     'url': 'https://weibo.com/u/3186945861?is_all=1&'
   },
-  {
-    'name': '南京',
-    'url': 'https://weibo.com/u/2638276292?is_all=1&s'
-  },
+  # {
+  #   'name': '南京',
+  #   'url': 'https://weibo.com/u/2638276292?is_all=1&s'
+  # },
   # {
   #   'name': '深圳',
   #   'url': 'https://weibo.com/szmcservice?is_all=1&'
   # }
 ]
 
-years = ['2021']
-# mouths = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
-mouths = ['01', '02', '03']
+years = ['2020']
+mouths = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
+# mouths = ['03']
 
 def scrollBottom():
   jsscript = 'window.scrollTo(0, document.body.clientHeight)'
@@ -72,6 +72,11 @@ def getPageSize():
 def getTime(node, curYear, name):
   # year = time.localtime().tm_year
   # dateText = node.find('div', attrs={'class': 'WB_from S_txt2'}).find('a').string
+  temDate = node.find('div', attrs={'class': 'WB_from S_txt2'}).get_text().strip()
+  publishYear = ''
+  if temDate.find('-') != -1:
+    publishYear = temDate.split('-')[0].strip()
+    pass
   if name == '成都':
     temText = node.find('div', attrs={'class': 'WB_text W_f14'}).get_text().split('】')[1]
     if temText.find('星期') != -1:
@@ -86,7 +91,14 @@ def getTime(node, curYear, name):
   elif name == '西安':
     mouthDayText = node.find('div', attrs={'class': 'WB_text W_f14'}).get_text().split('，')[0].split('#客流数据#')[1].strip()
   elif name == '南京':
-    mouthDayText = node.find('div', attrs={'class': 'WB_text W_f14'}).get_text().split('南京地铁')[1].split('日')[0].strip() + '日'
+    # mouthDayText = node.find('div', attrs={'class': 'WB_text W_f14'}).get_text().split('南京地铁')[1].split('日')[0].strip() + '日'
+    tem = node.find('div', attrs={'class': 'WB_text W_f14'}).get_text().split('南京地铁')[1].split('，')[0].strip()
+    if tem.find('日') != -1:
+      mouthDayText = tem.split('日')[0].strip() + '日'
+    elif tem.find('客运量') != -1:
+      mouthDayText = tem.split('客运量')[0].strip() + '日'
+    elif tem.find('线网') != -1:
+      mouthDayText = tem.split('线网')[0].strip() + '日'
   elif name == '重庆':
     mouthDayText = node.find('div', attrs={'class': 'WB_text W_f14'}).get_text().split('，')[0].split('#')[2].strip()
   else:
@@ -98,6 +110,9 @@ def getTime(node, curYear, name):
   #   year = tup[0].replace('\n', '').replace('\r', '').strip()
   # return ustr
   temYear = ''
+  # curYear = publishYear ? publishYear : curYear
+  if publishYear != '':
+    curYear = publishYear
   if mouthDayText == '12月31日':
     temYear = int(curYear)-1
   else:
@@ -162,7 +177,7 @@ def getData(name, curYear):
         }
         saveDataToDB(info)
       else:
-        print('no used item')
+        # print('no used item')
         pass
       pass
   elif name == '武汉':
@@ -183,7 +198,7 @@ def getData(name, curYear):
         }
         saveDataToDB(info)
       else:
-        print('no used item')
+        # print('no used item')
         pass
       pass
     pass
@@ -213,7 +228,7 @@ def getData(name, curYear):
         }
         saveDataToDB(info)
       else:
-        print('no used item')
+        # print('no used item')
         pass
       pass
     pass
@@ -231,6 +246,12 @@ def getData(name, curYear):
             passenger = nodeText.split(',')[0].split('客运量')[1]
         except Exception as e:
           pass
+        if passenger.find('万') != -1:
+          passenger = passenger.split('万')[0]
+        if passenger.find(', ') != -1:
+          passenger = passenger.split(',')[0]
+        if passenger.find('其中') != -1:
+          passenger = passenger.split('其中')[0]
         print(passenger)
         recordTime = getTime(item, curYear, name)
         print(recordTime)
@@ -241,7 +262,7 @@ def getData(name, curYear):
         }
         saveDataToDB(info)
       else:
-        print('no used item')
+        # print('no used item')
         pass
       pass
     pass
@@ -263,7 +284,7 @@ def getData(name, curYear):
         }
         saveDataToDB(info)
       else:
-        print('no used item')
+        # print('no used item')
         pass
       pass
     pass

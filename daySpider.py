@@ -67,7 +67,12 @@ def getTime(node, curYear, name):
   elif name == '西安':
     mouthDayText = node.find('div', attrs={'class': 'WB_text W_f14'}).get_text().split('，')[0].split('#客流数据#')[1].strip()
   elif name == '南京':
-    mouthDayText = node.find('div', attrs={'class': 'WB_text W_f14'}).get_text().split('南京地铁')[1].split('日')[0].strip() + '日'
+    # mouthDayText = node.find('div', attrs={'class': 'WB_text W_f14'}).get_text().split('南京地铁')[1].split('日')[0].strip() + '日'
+    tem = node.find('div', attrs={'class': 'WB_text W_f14'}).get_text().split('南京地铁')[1].split('，')[0].strip()
+    if tem.find('日') != -1:
+      mouthDayText = tem.split('日')[0].strip() + '日'
+    else:
+      mouthDayText = tem.split('客运量')[0].strip() + '日'
   elif name == '重庆':
     mouthDayText = node.find('div', attrs={'class': 'WB_text W_f14'}).get_text().split('，')[0].split('#')[2].strip()
   else:
@@ -143,7 +148,7 @@ def getData(name, curYear):
         }
         saveDataToDB(info)
       else:
-        print('no used item')
+        # print('no used item')
         pass
       pass
   elif name == '武汉':
@@ -164,7 +169,7 @@ def getData(name, curYear):
         }
         saveDataToDB(info)
       else:
-        print('no used item')
+        # print('no used item')
         pass
       pass
     pass
@@ -194,7 +199,7 @@ def getData(name, curYear):
         }
         saveDataToDB(info)
       else:
-        print('no used item')
+        # print('no used item')
         pass
       pass
     pass
@@ -222,7 +227,7 @@ def getData(name, curYear):
         }
         saveDataToDB(info)
       else:
-        print('no used item')
+        # print('no used item')
         pass
       pass
     pass
@@ -244,7 +249,7 @@ def getData(name, curYear):
         }
         saveDataToDB(info)
       else:
-        print('no used item')
+        # print('no used item')
         pass
       pass
     pass
@@ -275,12 +280,13 @@ def spide():
 
 
 def job():
+  print('执行时间: ', time.strftime('%Y-%m-%d %H:%M', time.localtime()))
   spide()
   # print('do job')
 
 
 scheduler = BackgroundScheduler()
-# scheduler.add_job(job, 'interval', minutes=10)
+# scheduler.add_job(job, 'interval', minutes=20)
 scheduler.add_job(job, 'interval', hours=6)
 scheduler.start()
 
